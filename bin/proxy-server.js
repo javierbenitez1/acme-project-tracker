@@ -100,6 +100,7 @@ const server = http.createServer((req, res) => {
     headers: {
       'accept': headers.accept || 'application/json',
       'content-type': headers['content-type'] || 'application/json',
+      'authorization': headers.authorization || '',
       'user-agent': headers['user-agent'] || 'proxy-server',
       'host': target.host
     }

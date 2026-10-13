@@ -256,3 +256,9 @@ tfplan
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
+
+backend/*/core/
+!backend/_shared/core/
+backend/**/.vendor/
+.pip_installed
+.venv/
