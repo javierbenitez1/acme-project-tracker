@@ -44,6 +44,18 @@ def _coerce(value, f):
         if f.max_len is not None and len(value) > f.max_len:
             raise ValueError(f"Must be at most {f.max_len} characters.")
         return value
+    if kind == "ids":
+        if not isinstance(value, list) or not value:
+            raise ValueError("Must be a non-empty list of ids.")
+        if f.max_len is not None and len(value) > f.max_len:
+            raise ValueError(f"Must contain at most {f.max_len} ids.")
+        ids = []
+        for item in value:
+            if isinstance(item, bool) or not isinstance(item, int) or item < 1:
+                raise ValueError("Every id must be a positive whole number.")
+            if item not in ids:
+                ids.append(item)
+        return ids
     if kind == "int":
         if isinstance(value, bool) or (isinstance(value, float) and not value.is_integer()):
             raise ValueError("Must be a whole number.")

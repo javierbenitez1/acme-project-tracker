@@ -97,10 +97,12 @@ const server = http.createServer((req, res) => {
     port: target.port,
     path: target.path,
     method: req.method,
+    agent: false, // fresh connection per request so one bad request can't poison the next
     headers: {
       'accept': headers.accept || 'application/json',
       'content-type': headers['content-type'] || 'application/json',
       'authorization': headers.authorization || '',
+      ...(headers['content-length'] ? { 'content-length': headers['content-length'] } : {}),
       'user-agent': headers['user-agent'] || 'proxy-server',
       'host': target.host
     }
