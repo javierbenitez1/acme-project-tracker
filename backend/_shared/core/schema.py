@@ -199,6 +199,8 @@ CREATE INDEX IF NOT EXISTS idx_action_items_project ON action_items(project_id, 
 CREATE INDEX IF NOT EXISTS idx_activity_created ON activity_log(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_activity_actor ON activity_log(actor_id, created_at DESC);
 
+ALTER TABLE deliverables ADD COLUMN IF NOT EXISTS status_note TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_users_manager ON users(manager_id);
 CREATE INDEX IF NOT EXISTS idx_projects_manager ON projects(manager_id);
 CREATE INDEX IF NOT EXISTS idx_milestones_project ON milestones(project_id);
