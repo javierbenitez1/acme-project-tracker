@@ -114,3 +114,26 @@ def validate(data, schema, partial=False):
     if errors:
         raise bad_request("Some fields are invalid.", details=errors)
     return cleaned
+
+
+def query_int(query, name, default=None, lo=1, hi=None):
+    """Reads an optional whole-number query parameter, or raises a 400 that names it."""
+    raw = query.get(name)
+    if raw in (None, ""):
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        raise bad_request("Invalid filter.", {name: "Must be a whole number."})
+    if value < lo or (hi is not None and value > hi):
+        limit = f"between {lo} and {hi}" if hi is not None else f"at least {lo}"
+        raise bad_request("Invalid filter.", {name: f"Must be {limit}."})
+    return value
+
+
+def query_choice(query, name, choices, default=None):
+    """Reads an optional query parameter that must be one of the allowed choices."""
+    value = query.get(name) or default
+    if value is not None and value not in choices:
+        raise bad_request("Invalid filter.", {name: f"Must be one of: {', '.join(choices)}."})
+    return value

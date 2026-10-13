@@ -64,7 +64,9 @@ const server = http.createServer((req, res) => {
 
   const endpointName = pathParts[1];
   const remainingPath = pathParts.length > 2 ? '/' + pathParts.slice(2).join('/') : '';
-  const targetUrl = endpoints[endpointName] + remainingPath + (parsedUrl.search || '');
+  const targetUrl = endpoints[endpointName]
+    ? endpoints[endpointName] + remainingPath + (parsedUrl.search || '')
+    : null; // unknown service: let the 404 check below handle it instead of a confusing 502
 
   if (!targetUrl) {
     res.writeHead(404, { 'Content-Type': 'application/json' });
