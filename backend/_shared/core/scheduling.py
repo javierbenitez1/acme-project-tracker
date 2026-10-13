@@ -65,3 +65,12 @@ def peak_daily_load(assignments, start, end):
                 peak, peak_day = load, day
         day += timedelta(days=1)
     return peak, peak_day
+
+
+def weekly_hours(assignments, week_start):
+    """Total hours booked Monday to Friday of the week that starts on week_start (a Monday)."""
+    total = 0.0
+    for offset in range(5):
+        day = week_start + timedelta(days=offset)
+        total += sum(float(a["hours_per_day"]) for a in assignments if a["start_date"] <= day <= a["end_date"])
+    return total
