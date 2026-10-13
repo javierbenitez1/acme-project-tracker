@@ -137,3 +137,14 @@ def query_choice(query, name, choices, default=None):
     if value is not None and value not in choices:
         raise bad_request("Invalid filter.", {name: f"Must be one of: {', '.join(choices)}."})
     return value
+
+
+def query_date(query, name):
+    """Reads an optional YYYY-MM-DD query parameter, or raises a 400 that names it."""
+    raw = query.get(name)
+    if not raw:
+        return None
+    try:
+        return date.fromisoformat(raw)
+    except ValueError:
+        raise bad_request("Invalid filter.", {name: "Must be a date in YYYY-MM-DD format."})

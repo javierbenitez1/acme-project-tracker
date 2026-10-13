@@ -64,3 +64,23 @@ def enrich(project, today=None):
     project.update(project_health(project, today))
     project["is_archived"] = project.get("archived_at") is not None
     return project
+
+
+def budget_forecast(planned, spent, start, end, today=None):
+    """Projects the final spend by assuming the current daily burn rate continues to the end date."""
+    today = today or date.today()
+    total_days = max((end - start).days + 1, 1)
+    elapsed = min(max((today - start).days + 1, 0), total_days)
+    if spent <= 0 or elapsed < max(total_days * 0.1, 1):
+        return {"projected_total": None, "projected_variance": None, "daily_burn": None,
+                "status": "not_enough_data"}
+    daily = spent / elapsed
+    projected = round(daily * total_days, 2)
+    if planned <= 0 or projected > planned * 1.05:
+        status = "over"
+    elif projected < planned * 0.85:
+        status = "under"
+    else:
+        status = "on_track"
+    return {"projected_total": projected, "projected_variance": round(projected - planned, 2),
+            "daily_burn": round(daily, 2), "status": status}
