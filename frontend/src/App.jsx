@@ -3,6 +3,7 @@ import { useAuth } from './auth/AuthContext';
 import AppShell from './components/AppShell';
 import LoginPage from './pages/LoginPage';
 import ComingSoon from './pages/ComingSoon';
+import DashboardPage from './pages/DashboardPage';
 
 function RequireAuth({ children, roles }) {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route element={<RequireAuth><AppShell /></RequireAuth>}>
-        <Route index element={<ComingSoon title="Dashboard" />} />
+        <Route index element={<DashboardPage />} />
         <Route path="my-work" element={only(['employee'], <ComingSoon title="My work" />)} />
         <Route path="projects" element={<ComingSoon title="Projects" />} />
         <Route path="projects/:projectId" element={<ComingSoon title="Project" />} />
