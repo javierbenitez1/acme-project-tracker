@@ -128,7 +128,7 @@ export function RecentSignIns() {
               </Typography>
             </Box>
             <Chip size="small" variant="outlined" color={event.succeeded ? 'success' : 'error'}
-              label={event.succeeded ? 'Signed in' : 'Failed attempt'} />
+              label={event.succeeded ? 'Signed in' : event.blocked ? 'Refused (account locked)' : 'Failed attempt'} />
           </Box>
         ))}
       </Stack>

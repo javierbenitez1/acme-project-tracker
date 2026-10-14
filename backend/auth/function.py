@@ -20,11 +20,19 @@ def login(req):
         user = cur.fetchone()
         valid = tokens.verify_password(data["password"], user["password_hash"] if user else None)
         failure = None if valid and user["is_active"] else ("INVALID_CREDENTIALS" if not valid else "ACCOUNT_INACTIVE")
+        locked = security.locked_until(cur, user["id"]) if user else None
+        if locked:
+            failure = "ACCOUNT_LOCKED"  # even the right password is refused until the lock ends
         if user:
-            security.record_sign_in(cur, user["id"], failure is None, req.headers)
+            security.record_sign_in(cur, user["id"], failure is None, req.headers, blocked=bool(locked))
+            if failure == "INVALID_CREDENTIALS":
+                locked = security.locked_until(cur, user["id"])  # this attempt may have been the fifth
+                failure = "ACCOUNT_LOCKED" if locked else failure
         if failure is None:
             refresh_token = tokens.issue_refresh_token(cur, user["id"])
     # Raised after the transaction commits, so failed attempts stay in the sign-in history
+    if failure == "ACCOUNT_LOCKED":
+        raise security.locked_error(locked)
     if failure == "INVALID_CREDENTIALS":
         raise unauthorized("Incorrect username or password.", "INVALID_CREDENTIALS")
     if failure:

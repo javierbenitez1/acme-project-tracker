@@ -26,3 +26,20 @@ def test_sign_in_history_reports_failed_attempts_since_last_visit(admin, manager
 
 def test_sign_in_history_needs_a_session():
     assert requests.get(f"{API}/auth/sign-ins", timeout=60).status_code == 401
+
+
+def test_five_failed_attempts_lock_the_account(admin, manager_account, run_id):
+    creds = {"username": f"it_lock_{run_id}", "password": "Locked1234"}
+    created = admin.post("users", {**creds, "name": f"Lee Lockwood{run_id}", "role": "employee",
+                                   "email": f"it_lock_{run_id}@acme.test", "manager_id": manager_account["id"]})
+    assert created.status_code == 201, created.text
+    for _ in range(4):
+        assert attempt(creds["username"], "not-the-password-1").status_code == 401
+    fifth = attempt(creds["username"], "not-the-password-1")
+    assert fifth.status_code == 423 and fifth.json()["error"]["code"] == "ACCOUNT_LOCKED"
+    assert attempt(creds["username"], creds["password"]).status_code == 423  # even the right password
+
+
+def test_the_health_check_is_public():
+    response = requests.get(f"{API}/auth/health", timeout=60)
+    assert response.status_code == 200 and response.json()["status"] == "ok"

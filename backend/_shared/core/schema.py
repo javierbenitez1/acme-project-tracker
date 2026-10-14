@@ -242,6 +242,7 @@ CREATE TABLE IF NOT EXISTS sign_in_events (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_sign_in_events_user ON sign_in_events(user_id, created_at DESC);
+ALTER TABLE sign_in_events ADD COLUMN IF NOT EXISTS blocked BOOLEAN NOT NULL DEFAULT FALSE;
 """
 
 _READY = False

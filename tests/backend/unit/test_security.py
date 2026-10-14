@@ -1,7 +1,7 @@
 """Unit tests for sign-in history: readable devices, masked addresses, and the summary shown at sign-in."""
 from datetime import datetime, timedelta, timezone
 
-from core.security import client_address, describe_device, mask_ip, summarize
+from core.security import client_address, describe_device, lock_until, locked_message, mask_ip, summarize
 
 NOW = datetime(2026, 10, 14, 12, 0, tzinfo=timezone.utc)
 
@@ -43,3 +43,36 @@ def test_summary_finds_the_previous_sign_in_and_failures_since():
 def test_first_ever_sign_in_has_no_previous():
     result = summarize([event(1, True, 0)])
     assert result["previous"] is None and result["failed_since_previous"] == 0
+
+
+# Lockout
+
+def attempts(*results, start_minutes_ago=30, step=1):
+    """results: True for success, False for failure, "blocked" for an attempt refused during a lock."""
+    return [{"succeeded": r is True, "blocked": r == "blocked",
+             "created_at": NOW - timedelta(minutes=start_minutes_ago - i * step)} for i, r in enumerate(results)]
+
+
+def test_five_failures_in_a_row_lock_the_account_for_15_minutes():
+    events = attempts(False, False, False, False, False, start_minutes_ago=5)
+    assert lock_until(events, NOW) == events[-1]["created_at"] + timedelta(minutes=15)
+    assert lock_until(events[:4], NOW) is None
+
+
+def test_a_success_resets_the_count():
+    assert lock_until(attempts(False, False, False, True, False, False), NOW) is None
+
+
+def test_the_lock_ends_and_refused_attempts_do_not_extend_it():
+    events = attempts(False, False, False, False, False, "blocked", "blocked", start_minutes_ago=40)
+    assert lock_until(events, NOW) is None  # the lock started 36 minutes ago, so it has ended
+
+
+def test_failures_after_a_lock_start_counting_again():
+    events = attempts(False, False, False, False, False, start_minutes_ago=60) + attempts(False, start_minutes_ago=2)
+    assert lock_until(events, NOW) is None
+
+
+def test_the_locked_message_counts_down_in_minutes():
+    assert "locked for 15 more minutes" in locked_message(NOW + timedelta(minutes=14, seconds=30), NOW)
+    assert "locked for 1 more minute." in locked_message(NOW + timedelta(seconds=20), NOW)
