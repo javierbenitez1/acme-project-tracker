@@ -124,7 +124,11 @@ def _workload_findings(cur, today):
 def sync(cur, today=None):
     """Brings action items in line with the current state of every active project."""
     today = today or date.today()
-    cur.execute("SELECT pg_advisory_xact_lock(777001)")  # one sync at a time
+    # If another request is already refreshing the items, skip instead of queueing behind it.
+    # Under load, waiting here made every dashboard request line up (found by the load test).
+    cur.execute("SELECT pg_try_advisory_xact_lock(777001) AS acquired")
+    if not cur.fetchone()["acquired"]:
+        return
     findings = (_project_findings(cur, today) + _milestone_findings(cur, today)
                 + _deliverable_findings(cur, today) + _workload_findings(cur, today))
     if findings:
