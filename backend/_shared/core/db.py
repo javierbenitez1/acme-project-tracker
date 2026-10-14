@@ -16,7 +16,7 @@ def _conninfo():
         f"user={os.getenv('POSTGRES_USER') or 'postgres'}",
         f"password={os.getenv('POSTGRES_PASS') or 'postgres123'}",
         f"dbname={os.getenv('POSTGRES_NAME') or 'postgres'}",
-        "connect_timeout=15",
+        "connect_timeout=8",
     ]
     if not is_local:
         parts.append("sslmode=require")

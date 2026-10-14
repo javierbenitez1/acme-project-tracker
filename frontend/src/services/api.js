@@ -69,10 +69,13 @@ async function send(method, path, body, token) {
   }
   if (!response.ok) {
     const error = data?.error || {};
+    const unavailable = [502, 503, 504].includes(response.status);
     throw new ApiError(
       response.status,
       error.code || 'HTTP_ERROR',
-      error.message || `The server returned an error (${response.status}).`,
+      error.message || (unavailable
+        ? 'The server is waking up after being idle. Try again in a few seconds.'
+        : `The server returned an error (${response.status}).`),
       error.details,
     );
   }
@@ -107,9 +110,18 @@ export async function request(method, path, body) {
       return send(method, path, body, session?.access_token);
     }
     if (error.status === 401 && session && path !== 'auth/login') auth.set(null);
-    if (error.status === 503 && method === 'GET') {
-      await wait(2500); // the serverless database may be waking up
-      return send(method, path, body, session?.access_token);
+    // The serverless database pauses when idle and takes up to ~30 seconds to wake. A 503 means nothing
+    // was saved, so any request can be retried. A 504 (gateway timeout) might have saved, so only reads retry.
+    const retryable = (e) => e.status === 503 || (method === 'GET' && (e.status === 502 || e.status === 504));
+    if (retryable(error)) {
+      for (let attempt = 1; attempt <= 3; attempt += 1) {
+        await wait(3000 * attempt);
+        try {
+          return await send(method, path, body, session?.access_token);
+        } catch (retryError) {
+          if (!retryable(retryError)) throw retryError;
+        }
+      }
     }
     throw error;
   }
