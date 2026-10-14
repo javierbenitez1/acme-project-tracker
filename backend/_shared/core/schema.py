@@ -209,6 +209,29 @@ CREATE INDEX IF NOT EXISTS idx_deliverables_assignee ON deliverables(assignee_id
 CREATE INDEX IF NOT EXISTS idx_assignments_user ON milestone_assignments(user_id);
 CREATE INDEX IF NOT EXISTS idx_budget_entries_project ON budget_entries(project_id);
 CREATE INDEX IF NOT EXISTS idx_activity_project ON activity_log(project_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS risks (
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER NOT NULL REFERENCES projects(id),
+    title VARCHAR(200) NOT NULL,
+    description TEXT,
+    category VARCHAR(20) NOT NULL DEFAULT 'other'
+        CHECK (category IN ('schedule', 'budget', 'resources', 'vendor', 'technical', 'scope', 'other')),
+    likelihood SMALLINT NOT NULL CHECK (likelihood BETWEEN 1 AND 5),
+    impact SMALLINT NOT NULL CHECK (impact BETWEEN 1 AND 5),
+    status VARCHAR(20) NOT NULL DEFAULT 'open'
+        CHECK (status IN ('open', 'mitigating', 'closed', 'occurred', 'dismissed')),
+    owner_id INTEGER REFERENCES users(id),
+    mitigation TEXT,
+    review_date DATE,
+    source_key VARCHAR(120),
+    created_by INTEGER REFERENCES users(id),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    closed_at TIMESTAMPTZ,
+    UNIQUE (project_id, source_key)
+);
+CREATE INDEX IF NOT EXISTS idx_risks_project ON risks(project_id, status);
 """
 
 _READY = False

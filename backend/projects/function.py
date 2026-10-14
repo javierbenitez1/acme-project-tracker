@@ -363,5 +363,10 @@ def remove_member(req):
     return 204, None
 
 
+from core import risks as risk_register  # noqa: E402 (adds the /projects/risks routes to this router)
+
+risk_register.register(router)
+
+
 def handler(event, context=None):
     return router.handle(event, context)

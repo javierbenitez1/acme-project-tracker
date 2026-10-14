@@ -3,7 +3,7 @@ import { useToast } from '../components/Toast';
 import { describeError } from '../utils/errors';
 
 /** Everything that could show changed data. Refreshing them all keeps every screen consistent after a save. */
-const REFRESH = ['project', 'projects', 'milestones', 'deliverables', 'budgets', 'dashboard', 'actions', 'users'];
+const REFRESH = ['project', 'projects', 'milestones', 'deliverables', 'budgets', 'dashboard', 'actions', 'users', 'schedule'];
 
 /** Runs an API write, refreshes affected screens, and reports the outcome in a toast. */
 export default function useApiMutation(mutationFn, { success, onSuccess, onError } = {}) {

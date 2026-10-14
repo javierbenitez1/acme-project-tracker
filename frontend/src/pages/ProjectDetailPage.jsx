@@ -12,6 +12,7 @@ import { api } from '../services/api';
 import { useToast } from '../components/Toast';
 import HealthChip, { healthText } from '../components/HealthChip';
 import ScheduleTimeline, { DeliveryForecast } from '../components/ScheduleTimeline';
+import RisksTab from '../components/project/RisksTab';
 import ProgressCompare from '../components/ProgressCompare';
 import Section from '../components/Section';
 import { EmptyState, ErrorState } from '../components/PageState';
@@ -24,6 +25,7 @@ import { formatDate, formatMoney, initials, timeAgo } from '../utils/format';
 const TABS = [
   { value: 'overview', label: 'Overview' },
   { value: 'timeline', label: 'Timeline' },
+  { value: 'risks', label: 'Risks' },
   { value: 'milestones', label: 'Milestones' },
   { value: 'team', label: 'Team' },
   { value: 'budget', label: 'Budget', managersOnly: true },
@@ -227,6 +229,7 @@ export default function ProjectDetailPage() {
         </Section>
       )}
       {tab === 'milestones' && <MilestonesTab project={project} milestones={milestones} loading={milestonesQuery.isPending} />}
+      {tab === 'risks' && <RisksTab project={project} />}
       {tab === 'team' && <TeamTab project={project} milestones={milestones} />}
       {tab === 'budget' && <BudgetTab project={project} />}
       {tab === 'history' && <History project={project} milestones={milestones} />}

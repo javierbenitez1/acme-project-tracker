@@ -121,6 +121,23 @@ def _workload_findings(cur, today):
     return found
 
 
+def _risk_findings(cur, today):
+    """Risks whose review date has passed get a reminder for their owner, or the manager if there's none."""
+    cur.execute(
+        "SELECT r.id, r.title, r.review_date, r.likelihood, r.impact, r.owner_id, p.id AS project_id,"
+        " p.name AS project_name, p.manager_id FROM risks r JOIN projects p ON p.id = r.project_id"
+        f" WHERE {ACTIVE_PROJECT} AND r.status IN ('open', 'mitigating') AND r.review_date < %s", (today,))
+    found = []
+    for r in cur.fetchall():
+        found.append(_item(
+            f"risk_review_overdue:{r['id']}", f"Review the risk: {r['title']} ({r['project_name']})",
+            f"Its review date ({r['review_date']}) has passed. Check whether the likelihood or impact changed, "
+            "then update the plan or close the risk.",
+            "high" if r["likelihood"] * r["impact"] >= 15 else "medium",
+            r["owner_id"] or r["manager_id"], r["project_id"], "risk", r["id"], today))
+    return found
+
+
 def sync(cur, today=None):
     """Brings action items in line with the current state of every active project."""
     today = today or date.today()
@@ -130,7 +147,8 @@ def sync(cur, today=None):
     if not cur.fetchone()["acquired"]:
         return
     findings = (_project_findings(cur, today) + _milestone_findings(cur, today)
-                + _deliverable_findings(cur, today) + _workload_findings(cur, today))
+                + _deliverable_findings(cur, today) + _workload_findings(cur, today)
+                + _risk_findings(cur, today))
     if findings:
         cur.executemany(
             "INSERT INTO action_items (title, description, priority, source, rule_key, assignee_id, project_id,"
