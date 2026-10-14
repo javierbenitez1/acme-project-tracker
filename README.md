@@ -113,6 +113,7 @@ flowchart LR
 - **8-hour day.** Booking checks the busiest weekday across every overlapping milestone on every active project. The refusal says how many hours are free and what the person is already booked on.
 - **Critical path and delivery forecast.** The Timeline tab finds the chain of milestones with the least slack, using a backward pass over the dependency graph in reverse topological order (Kahn's algorithm). A delay anywhere on that chain moves the project end date, and every other milestone shows how many days it can slip. The forecast projects the finish date from the pace of work so far, as an early warning rather than a promise.
 - **Risk register.** Each project has a Risks tab: risks scored by likelihood and impact (1 to 5 each) on a 5x5 matrix, each with an owner, a mitigation plan, a review date and a status. The app suggests risks from live signals (no buffer on the critical path, a late delivery forecast, spending on pace to overrun), and managers add or dismiss them. Overdue reviews become Action Center items, every change is audited, and employees can read risks but never see budget risks.
+- **Ask Throughline.** A chat assistant on every page (or Ctrl+J) that answers plain-English questions from live data: project status, what's at risk, overdue, blocked or due soon, who's overbooked or free, budgets, and "what should I work on?". It also works as built-in support, explaining how to reschedule, assign people, restore projects and more. It is rule-based on purpose: questions are matched to intents, answers come from the same permission-checked queries as the rest of the app, so it can't invent facts or reveal data. answer() is a single entry point, so an LLM such as Claude on Bedrock could slot in later.
 - **Action Center.** Rules raise items for overdue projects and milestones, budgets over plan, blocked or overdue work, over-allocated people, milestones ready to start or close, and projects ready to complete. Items close themselves once the problem is fixed and reopen if it comes back. Closing anything by hand requires a note, and every resolution is in the audit log.
 
 ## Running it locally
@@ -140,9 +141,9 @@ API_URL=https://<cloudfront-domain>/api .venv/bin/python scripts/seed_demo.py
 
 | Suite | Count | Command |
 |---|---|---|
-| Backend unit tests (validation, auth, router, health score, scheduling, forecast) | part of 233 | `.venv/bin/pytest tests/backend/unit` |
-| Backend integration tests (real API and database, every role and rule) | part of 233 | `.venv/bin/pytest tests/backend/integration` |
-| Frontend tests (API client, login journey, briefing, formatting, forms, components) | 46 | `cd frontend && npm test` |
+| Backend unit tests (validation, auth, router, health score, scheduling, forecast) | part of 266 | `.venv/bin/pytest tests/backend/unit` |
+| Backend integration tests (real API and database, every role and rule) | part of 266 | `.venv/bin/pytest tests/backend/integration` |
+| Frontend tests (API client, login journey, briefing, formatting, forms, components) | 51 | `cd frontend && npm test` |
 | Load test against the live API | see below | `API_URL=... .venv/bin/python scripts/load_test.py` |
 
 Full output and coverage: [backend](docs/test-results-backend.txt), [frontend](docs/test-results-frontend.txt). Integration tests create their own uniquely named users, so they can run any number of times, and modules that book time use their own employee so the 8-hour rule doesn't make results depend on test order.
@@ -185,7 +186,7 @@ Found by my own tests:
 - **Reasons are required** for every date or budget change and every manually closed action item. That's what makes the history and the audit log useful.
 - **Action items are computed by rules on read** instead of a scheduled job. They're always current with no extra infrastructure, at the cost of some work on dashboard loads (now limited to one refresh at a time).
 - **Tokens in localStorage** so a page refresh keeps you signed in. The risk is limited by 15-minute access tokens and refresh token rotation with reuse detection. HttpOnly cookies would be stronger but need more CloudFront and CORS configuration.
-- **The status briefing is rule-based, not AI.** It's written from the live data with fixed rules, so it's predictable and testable. If an AI model is available (for example Amazon Bedrock, which this account's Lambdas don't have permission for), it could generate the same briefing behind the same button.
+- **The status briefing is rule-based, not AI.** It's written from the live data with fixed rules, so it's predictable and testable. If an AI model is available (for example Amazon Bedrock, which this account's Lambdas don't have permission for), it could generate the same briefing and power Ask Throughline behind the same API.
 
 ## Known gaps and next steps
 
