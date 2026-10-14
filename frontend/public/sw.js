@@ -1,6 +1,6 @@
 /* Throughline service worker: caches the app's code so it opens fast and works offline.
    API data is never cached, so numbers on screen are always live. */
-const CACHE = 'throughline-v1';
+const CACHE = 'throughline-v2';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -23,7 +23,7 @@ self.addEventListener('fetch', (event) => {
   // Pages: always try the network first so a new deploy shows up, fall back to the cached app when offline.
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-cache' })  // ask the server every time, never the browser's HTTP cache
         .then((response) => {
           const copy = response.clone();
           caches.open(CACHE).then((cache) => cache.put('/index.html', copy));
