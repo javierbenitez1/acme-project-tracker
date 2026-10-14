@@ -345,7 +345,7 @@ def _project_link(project, tab=None):
 
 # ---------- answering ----------
 
-def answer(cur, me, question, context_project_id=None, today=None):
+def _answer(cur, me, question, context_project_id=None, today=None):
     today = today or date.today()
     role, first = me["role"], me["name"].split()[0]
     intent = classify(question)
@@ -491,7 +491,8 @@ def answer(cur, me, question, context_project_id=None, today=None):
             lines.append("Highest logged risks:")
             lines += [f"- **{r['title']}** ({r['project_name']}): {r['level']}, {r['score']} of 25" for r in risks[:3]]
         links = [_project_link(p, "risks") for p in troubled[:2]]
-        return reply("\n".join(lines), links=links, follow_ups=suggestions(role), intent=intent)
+        focus = troubled[0] if len(troubled) == 1 else None  # one flagged project: offer follow-ups about it
+        return reply("\n".join(lines), links=links, follow_ups=suggestions(role, focus), project=focus, intent=intent)
 
     if intent == "team" and project:
         cur.execute("SELECT u.name, u.job_title FROM project_members pm JOIN users u ON u.id = pm.user_id"
@@ -529,6 +530,14 @@ def answer(cur, me, question, context_project_id=None, today=None):
     return reply("I'm not sure I understood that one. I can answer questions about project status, risks, overdue "
                  "or blocked work, deadlines, workload and budgets, or explain how something works. Try one of these:",
                  follow_ups=suggestions(role, project), intent="unknown")
+
+
+def answer(cur, me, question, context_project_id=None, today=None):
+    """Answers a question, then drops any suggested follow-up that just repeats it."""
+    result = _answer(cur, me, question, context_project_id, today)
+    asked = normalize(question).strip()
+    result["follow_ups"] = [q for q in result["follow_ups"] if normalize(q).strip() != asked]
+    return result
 
 
 ASK_SCHEMA = {"question": F("str", required=True, max_len=500), "project_id": F("int", nullable=True, min=1)}

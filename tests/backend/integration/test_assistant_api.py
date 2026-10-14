@@ -102,3 +102,8 @@ def test_employees_get_their_own_work_and_no_budget(helper, setup):
 def test_questions_are_validated(manager, setup):
     assert manager.post("dashboard/ask", {"question": ""}).status_code == 400
     assert manager.post("dashboard/ask", {"question": "x" * 501}).status_code == 400
+
+
+def test_follow_ups_never_repeat_the_question(manager, setup):
+    reply = ask(manager, "Which projects are at risk?")
+    assert "Which projects are at risk?" not in reply["follow_ups"]

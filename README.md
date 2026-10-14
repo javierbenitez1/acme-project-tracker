@@ -141,8 +141,8 @@ API_URL=https://<cloudfront-domain>/api .venv/bin/python scripts/seed_demo.py
 
 | Suite | Count | Command |
 |---|---|---|
-| Backend unit tests (validation, auth, router, health score, scheduling, forecast) | part of 266 | `.venv/bin/pytest tests/backend/unit` |
-| Backend integration tests (real API and database, every role and rule) | part of 266 | `.venv/bin/pytest tests/backend/integration` |
+| Backend unit tests (validation, auth, router, health score, scheduling, forecast) | part of 267 | `.venv/bin/pytest tests/backend/unit` |
+| Backend integration tests (real API and database, every role and rule) | part of 267 | `.venv/bin/pytest tests/backend/integration` |
 | Frontend tests (API client, login journey, briefing, formatting, forms, components) | 51 | `cd frontend && npm test` |
 | Load test against the live API | see below | `API_URL=... .venv/bin/python scripts/load_test.py` |
 
