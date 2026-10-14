@@ -39,12 +39,6 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
 
-  custom_error_response {
-    error_code            = 404
-    error_caching_min_ttl = 300
-    response_code         = 200
-    response_page_path    = "/index.html"
-  }
 
   # logging_config {
   #   include_cookies = false
@@ -95,6 +89,11 @@ resource "aws_cloudfront_distribution" "this" {
     min_ttl     = 0
 
     target_origin_id       = local.origin_id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.spa[0].arn
+    }
     viewer_protocol_policy = "redirect-to-https"
 
     forwarded_values {
@@ -146,4 +145,22 @@ resource "aws_s3_bucket_policy" "this" {
       }
     ]
   })
+}
+
+# Sends single-page-app routes such as /projects/3 to index.html. It runs only on the website
+# behavior, so API responses (including real 404s and 403s) pass through untouched.
+resource "aws_cloudfront_function" "spa" {
+  count   = data.aws_caller_identity.this.id != "000000000000" ? 1 : 0
+  name    = format("%s-spa-%s", var.aws_project, local.app_id)
+  runtime = "cloudfront-js-1.0"
+  publish = true
+  code    = <<-EOT
+    function handler(event) {
+      var request = event.request;
+      if (request.uri.indexOf('.') === -1) {
+        request.uri = '/index.html';
+      }
+      return request;
+    }
+  EOT
 }
