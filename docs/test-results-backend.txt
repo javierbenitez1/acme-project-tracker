@@ -1,0 +1,22 @@
+........................................................................ [ 72%]
+........................................................                 [100%]
+
+---------- coverage: platform linux, python 3.13.16-final-0 ----------
+Name                                 Stmts   Miss  Cover
+--------------------------------------------------------
+backend/_shared/core/__init__.py         5      0   100%
+backend/_shared/core/actions.py         65     65     0%
+backend/_shared/core/activity.py        16      6    62%
+backend/_shared/core/auth.py            84     34    60%
+backend/_shared/core/db.py              35     25    29%
+backend/_shared/core/errors.py          17      3    82%
+backend/_shared/core/http.py           114     13    89%
+backend/_shared/core/metrics.py         65      0   100%
+backend/_shared/core/projects.py        27     27     0%
+backend/_shared/core/scheduling.py      58      2    97%
+backend/_shared/core/schema.py          16     10    38%
+backend/_shared/core/validation.py     125     12    90%
+--------------------------------------------------------
+TOTAL                                  627    197    69%
+
+200 passed in 7.56s

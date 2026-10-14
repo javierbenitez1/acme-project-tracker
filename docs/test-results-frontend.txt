@@ -1,0 +1,45 @@
+  ...irmDialog.jsx |       0 |        0 |       0 |       0 | 1-29              
+  FormDialog.jsx   |       0 |        0 |       0 |       0 | 1-28              
+  GanttChart.jsx   |       0 |        0 |       0 |       0 | 1-179             
+  HealthChip.jsx   |     100 |    71.42 |     100 |     100 | 14,19             
+  PageState.jsx    |       0 |        0 |       0 |       0 | 1-22              
+  PortfolioMap.jsx |       0 |        0 |       0 |       0 | 1-137             
+  ...ssCompare.jsx |       0 |        0 |       0 |       0 | 1-42              
+  ProjectCard.jsx  |     100 |    55.55 |     100 |     100 | 7-9,29            
+  ...ormDialog.jsx |       0 |        0 |       0 |       0 | 1-59              
+  Section.jsx      |       0 |        0 |       0 |       0 | 1-17              
+  Toast.jsx        |   89.65 |       50 |   14.28 |   89.65 | 27-29             
+ ...onents/project |       0 |        0 |       0 |       0 |                   
+  AssignDialog.jsx |       0 |        0 |       0 |       0 | 1-70              
+  BudgetTab.jsx    |       0 |        0 |       0 |       0 | 1-222             
+  BurnChart.jsx    |       0 |        0 |       0 |       0 | 1-96              
+  ...bleDialog.jsx |       0 |        0 |       0 |       0 | 1-72              
+  ...oneDialog.jsx |       0 |        0 |       0 |       0 | 1-167             
+  ...stonesTab.jsx |       0 |        0 |       0 |       0 | 1-239             
+  TeamTab.jsx      |       0 |        0 |       0 |       0 | 1-129             
+ src/hooks         |   43.02 |    68.18 |      70 |   43.02 |                   
+  ...piMutation.js |       0 |        0 |       0 |       0 | 1-26              
+  useDebounce.js   |       0 |        0 |       0 |       0 | 1-11              
+  ...ementWidth.js |       0 |        0 |       0 |       0 | 1-15              
+  useFormState.js  |   97.36 |    78.94 |     100 |   97.36 | 8                 
+ src/pages         |    7.12 |    62.22 |   33.33 |    7.12 |                   
+  ...enterPage.jsx |       0 |        0 |       0 |       0 | 1-228             
+  ArchivePage.jsx  |       0 |        0 |       0 |       0 | 1-93              
+  AuditPage.jsx    |       0 |        0 |       0 |       0 | 1-145             
+  ComingSoon.jsx   |       0 |        0 |       0 |       0 | 1-10              
+  ...boardPage.jsx |       0 |        0 |       0 |       0 | 1-248             
+  LoginPage.jsx    |   78.32 |    82.35 |   85.71 |   78.32 | 29-48,94-107      
+  MyWorkPage.jsx   |       0 |        0 |       0 |       0 | 1-127             
+  PeoplePage.jsx   |       0 |        0 |       0 |       0 | 1-214             
+  ProfilePage.jsx  |       0 |        0 |       0 |       0 | 1-84              
+  ...etailPage.jsx |       0 |        0 |       0 |       0 | 1-234             
+  ProjectsPage.jsx |       0 |        0 |       0 |       0 | 1-97              
+  WorkloadPage.jsx |       0 |        0 |       0 |       0 | 1-168             
+ src/services      |   92.85 |    85.24 |   92.85 |   92.85 |                   
+  api.js           |   92.85 |    85.24 |   92.85 |   92.85 | ...95,122-123,125 
+ src/utils         |   76.22 |    83.09 |   88.23 |   76.22 |                   
+  briefing.js      |   89.65 |    67.74 |     100 |   89.65 | 12-15,40-41       
+  errors.js        |     100 |     90.9 |     100 |     100 | 16                
+  format.js        |   84.09 |      100 |   88.88 |   84.09 | 41-47             
+  timeline.js      |       0 |        0 |       0 |       0 | 1-23              
+-------------------|---------|----------|---------|---------|-------------------
