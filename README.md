@@ -112,6 +112,7 @@ flowchart LR
 - **Rescheduling.** Moving a milestone pushes later milestones forward just enough to keep their dependencies, keeping each one's length. Completed milestones never move. If that would run past the project's end, the manager can extend the project in the same step, and both changes go into the history with the reason.
 - **8-hour day.** Booking checks the busiest weekday across every overlapping milestone on every active project. The refusal says how many hours are free and what the person is already booked on.
 - **Critical path and delivery forecast.** The Timeline tab finds the chain of milestones with the least slack, using a backward pass over the dependency graph in reverse topological order (Kahn's algorithm). A delay anywhere on that chain moves the project end date, and every other milestone shows how many days it can slip. The forecast projects the finish date from the pace of work so far, as an early warning rather than a promise.
+- **Risk register.** Each project has a Risks tab: risks scored by likelihood and impact (1 to 5 each) on a 5x5 matrix, each with an owner, a mitigation plan, a review date and a status. The app suggests risks from live signals (no buffer on the critical path, a late delivery forecast, spending on pace to overrun), and managers add or dismiss them. Overdue reviews become Action Center items, every change is audited, and employees can read risks but never see budget risks.
 - **Action Center.** Rules raise items for overdue projects and milestones, budgets over plan, blocked or overdue work, over-allocated people, milestones ready to start or close, and projects ready to complete. Items close themselves once the problem is fixed and reopen if it comes back. Closing anything by hand requires a note, and every resolution is in the audit log.
 
 ## Running it locally
@@ -139,9 +140,9 @@ API_URL=https://<cloudfront-domain>/api .venv/bin/python scripts/seed_demo.py
 
 | Suite | Count | Command |
 |---|---|---|
-| Backend unit tests (validation, auth, router, health score, scheduling, forecast) | part of 216 | `.venv/bin/pytest tests/backend/unit` |
-| Backend integration tests (real API and database, every role and rule) | part of 216 | `.venv/bin/pytest tests/backend/integration` |
-| Frontend tests (API client, login journey, briefing, formatting, forms, components) | 41 | `cd frontend && npm test` |
+| Backend unit tests (validation, auth, router, health score, scheduling, forecast) | part of 233 | `.venv/bin/pytest tests/backend/unit` |
+| Backend integration tests (real API and database, every role and rule) | part of 233 | `.venv/bin/pytest tests/backend/integration` |
+| Frontend tests (API client, login journey, briefing, formatting, forms, components) | 46 | `cd frontend && npm test` |
 | Load test against the live API | see below | `API_URL=... .venv/bin/python scripts/load_test.py` |
 
 Full output and coverage: [backend](docs/test-results-backend.txt), [frontend](docs/test-results-frontend.txt). Integration tests create their own uniquely named users, so they can run any number of times, and modules that book time use their own employee so the 8-hour rule doesn't make results depend on test order.
