@@ -151,5 +151,10 @@ def workload(req):
     return 200, {"week_starts": week_starts, "capacity_per_week": WEEK_CAPACITY, "people": rows}
 
 
+from core import assistant  # noqa: E402 (adds POST /dashboard/ask to this router)
+
+assistant.register(router)
+
+
 def handler(event, context=None):
     return router.handle(event, context)

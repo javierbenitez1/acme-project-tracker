@@ -1,4 +1,5 @@
 import { Suspense, useState } from 'react';
+import AssistantPanel from './AssistantPanel';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 import { useQuery } from '@tanstack/react-query';
@@ -168,6 +169,7 @@ export default function AppShell() {
           <Suspense fallback={<LinearProgress aria-label="Loading the page" />}>
             <Outlet />
           </Suspense>
+          <AssistantPanel />
         </Box>
       </Box>
       {isMobile && mobileNav}
