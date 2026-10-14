@@ -2,7 +2,7 @@
 from . import db
 from .auth import hash_password
 
-DEFAULT_ADMIN = ("admin", "Admin123!", "System Admin", "admin@acme.com", "Administrator")
+DEFAULT_ADMIN = ("admin", "Admin123!", "Javier Benitez", "javier.benitez@acme.com", "Administrator")
 
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS app_config (

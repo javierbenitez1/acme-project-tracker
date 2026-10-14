@@ -86,7 +86,7 @@ def reset_local_database():
             cur.execute(f"TRUNCATE {', '.join(tables)} RESTART IDENTITY CASCADE")
             cur.execute("INSERT INTO users (username, password_hash, name, email, job_title, role)"
                         " VALUES (%s, %s, %s, %s, %s, 'admin')",
-                        (ADMIN_USERNAME, hash_password(ADMIN_PASSWORD), "Alex Rivera", "alex.rivera@acme.com",
+                        (ADMIN_USERNAME, hash_password(ADMIN_PASSWORD), "Javier Benitez", "javier.benitez@acme.com",
                          "Platform Administrator"))
     print("Cleared the local database.")
 

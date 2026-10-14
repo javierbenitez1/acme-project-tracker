@@ -189,4 +189,4 @@ def delete_entry(req):
 
 
 def handler(event, context=None):
-    return router.handle(event, context)s
+    return router.handle(event, context)

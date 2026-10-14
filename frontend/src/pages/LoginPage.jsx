@@ -12,7 +12,7 @@ import { ink } from '../theme';
 
 /** Demo accounts come from scripts/seed_demo.py. Set VITE_DEMO_LOGINS=false to hide them. */
 const DEMO_ACCOUNTS = [
-  { role: 'Administrator', name: 'Alex Rivera', blurb: 'sets up projects and people', username: 'admin', password: 'Admin123!' },
+  { role: 'Administrator', name: 'Javier Benitez', blurb: 'sets up projects and people', username: 'admin', password: 'Admin123!' },
   { role: 'Manager', name: 'Dana Whitfield', blurb: 'runs the mobile banking project', username: 'dana.whitfield', password: 'Demo1234!' },
   { role: 'Employee', name: 'Leo Martins', blurb: 'builds the transfers module', username: 'leo.martins', password: 'Demo1234!' },
 ];
