@@ -10,6 +10,7 @@ import { api } from '../services/api';
 import { health } from '../theme';
 import HealthChip, { healthText } from '../components/HealthChip';
 import PortfolioMap from '../components/PortfolioMap';
+import Section from '../components/Section';
 import { ErrorState } from '../components/PageState';
 import { formatDue, formatMoney, initials, timeAgo } from '../utils/format';
 
@@ -33,27 +34,16 @@ function briefing({ role, kpis, active, attention, myWork }) {
     return `You have ${plural(kpis.my_open_deliverables, 'open deliverable')}${extras.length ? `, ${extras.join(' and ')}` : ''}.`;
   }
   if (!active.length) return 'There are no active projects yet.';
-  if (!attention.length) return `All ${plural(active.length, 'active project')} are on track.`;
+  if (!attention.length) {
+    return active.length === 1
+      ? `${active[0].name} is on track, and it's the only active project.`
+      : `All ${active.length} active projects are on track.`;
+  }
   const worst = attention[0];
   const verb = attention.length === 1 ? 'needs' : 'need';
   const reason = worst.risk_reasons[0] ? ` ${worst.risk_reasons[0]}.` : '';
   return `${attention.length} of ${plural(active.length, 'active project')} ${verb} attention. `
     + `${worst.name} is ${health[worst.health].label.toLowerCase()}.${reason}`;
-}
-
-function Section({ title, subtitle, action, children }) {
-  return (
-    <Card component="section" aria-label={title} sx={{ height: '100%' }}>
-      <CardContent sx={{ p: { xs: 2, md: 3 }, '&:last-child': { pb: { xs: 2, md: 3 } } }}>
-        <Box sx={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 2, mb: subtitle ? 0.5 : 2 }}>
-          <Typography variant="h3" component="h2">{title}</Typography>
-          {action}
-        </Box>
-        {subtitle && <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>{subtitle}</Typography>}
-        {children}
-      </CardContent>
-    </Card>
-  );
 }
 
 function StatStrip({ stats }) {
@@ -199,6 +189,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const dashboard = useQuery({ queryKey: ['dashboard'], queryFn: () => api.get('dashboard'), refetchInterval: 30_000 });
   const milestones = useQuery({ queryKey: ['milestones', 'active'], queryFn: () => api.get('milestones'), refetchInterval: 60_000 });
+  const actionSummary = useQuery({ queryKey: ['actions', 'summary'], queryFn: () => api.get('actions/summary'), refetchInterval: 30_000 });
 
   if (dashboard.isPending) return <DashboardSkeleton />;
   if (dashboard.isError) return <ErrorState error={dashboard.error} onRetry={() => dashboard.refetch()} />;
@@ -220,7 +211,7 @@ export default function DashboardPage() {
     },
     isEmployee
       ? { label: 'Your open deliverables', value: kpis.my_open_deliverables }
-      : { label: 'Your open actions', value: kpis.my_open_actions },
+      : { label: 'Open action items', value: actionSummary.data?.open_total ?? kpis.my_open_actions },
   ].filter(Boolean);
 
   return (

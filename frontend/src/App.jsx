@@ -4,6 +4,8 @@ import AppShell from './components/AppShell';
 import LoginPage from './pages/LoginPage';
 import ComingSoon from './pages/ComingSoon';
 import DashboardPage from './pages/DashboardPage';
+import ProjectsPage from './pages/ProjectsPage';
+import ProjectDetailPage from './pages/ProjectDetailPage';
 
 function RequireAuth({ children, roles }) {
   const { user } = useAuth();
@@ -22,8 +24,8 @@ export default function App() {
       <Route element={<RequireAuth><AppShell /></RequireAuth>}>
         <Route index element={<DashboardPage />} />
         <Route path="my-work" element={only(['employee'], <ComingSoon title="My work" />)} />
-        <Route path="projects" element={<ComingSoon title="Projects" />} />
-        <Route path="projects/:projectId" element={<ComingSoon title="Project" />} />
+        <Route path="projects" element={<ProjectsPage />} />
+        <Route path="projects/:projectId" element={<ProjectDetailPage />} />
         <Route path="actions" element={<ComingSoon title="Action Center" />} />
         <Route path="workload" element={only(['admin', 'manager'], <ComingSoon title="Workload" />)} />
         <Route path="people" element={only(['admin', 'manager'], <ComingSoon title="People" />)} />

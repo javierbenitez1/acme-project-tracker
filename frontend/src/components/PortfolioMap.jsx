@@ -4,6 +4,7 @@ import { Box, ButtonBase, Tooltip, Typography } from '@mui/material';
 import HealthChip from './HealthChip';
 import { health } from '../theme';
 import { formatDate, parseDate, today as startOfToday } from '../utils/format';
+import { monthTicks } from '../utils/timeline';
 
 /**
  * The portfolio timeline: every project is a line on one shared calendar, and its milestones are
@@ -22,19 +23,6 @@ function stationStyle(milestone, todayMs) {
   if (overdue || milestone.status === 'blocked') return { size: 14, sx: { bgcolor: RED, border: `2px solid ${RED}` }, overdue };
   if (milestone.status === 'in_progress') return { size: 15, sx: { bgcolor: 'background.paper', border: `3px solid ${AMBER}` } };
   return { size: 12, sx: { bgcolor: 'background.paper', border: '2px solid', borderColor: 'text.disabled' } };
-}
-
-function monthTicks(min, max) {
-  const ticks = [];
-  const cursor = new Date(min);
-  cursor.setDate(1);
-  cursor.setMonth(cursor.getMonth() + 1);
-  while (cursor.getTime() <= max) {
-    ticks.push(new Date(cursor));
-    cursor.setMonth(cursor.getMonth() + 1);
-  }
-  const step = Math.ceil(ticks.length / 7) || 1;
-  return ticks.filter((_, index) => index % step === 0);
 }
 
 function Legend() {
@@ -120,7 +108,7 @@ export default function PortfolioMap({ projects, milestones = [] }) {
                   }}
                 >
                   <Box sx={{ minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, pl: 1 }}>
-                    <Typography noWrap sx={{ fontWeight: 600 }}>{project.name}</Typography>
+                    <Typography sx={{ fontWeight: 600, lineHeight: 1.3 }}>{project.name}</Typography>
                     <HealthChip value={project.health} size="small" />
                   </Box>
                   <Box sx={{ position: 'relative', height: 30 }}>
