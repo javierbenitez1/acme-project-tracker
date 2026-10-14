@@ -1,18 +1,19 @@
+import { lazy } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth/AuthContext';
 import AppShell from './components/AppShell';
 import LoginPage from './pages/LoginPage';
 import ComingSoon from './pages/ComingSoon';
-import DashboardPage from './pages/DashboardPage';
-import ProjectsPage from './pages/ProjectsPage';
-import ProjectDetailPage from './pages/ProjectDetailPage';
-import MyWorkPage from './pages/MyWorkPage';
-import ActionCenterPage from './pages/ActionCenterPage';
-import WorkloadPage from './pages/WorkloadPage';
-import PeoplePage from './pages/PeoplePage';
-import AuditPage from './pages/AuditPage';
-import ArchivePage from './pages/ArchivePage';
-import ProfilePage from './pages/ProfilePage';
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const ArchivePage = lazy(() => import('./pages/ArchivePage'));
+const AuditPage = lazy(() => import('./pages/AuditPage'));
+const PeoplePage = lazy(() => import('./pages/PeoplePage'));
+const WorkloadPage = lazy(() => import('./pages/WorkloadPage'));
+const ActionCenterPage = lazy(() => import('./pages/ActionCenterPage'));
+const MyWorkPage = lazy(() => import('./pages/MyWorkPage'));
+const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'));
+const ProjectsPage = lazy(() => import('./pages/ProjectsPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 
 function RequireAuth({ children, roles }) {
   const { user } = useAuth();

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 import { useQuery } from '@tanstack/react-query';
 import {
-  AppBar, Avatar, Badge, BottomNavigation, BottomNavigationAction, Box, Divider, Drawer, IconButton,
+  AppBar, Avatar, LinearProgress, Badge, BottomNavigation, BottomNavigationAction, Box, Divider, Drawer, IconButton,
   List, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Toolbar, Tooltip, Typography,
 } from '@mui/material';
 import { useColorScheme } from '@mui/material/styles';
@@ -165,7 +165,9 @@ export default function AppShell() {
           tabIndex={-1}
           sx={{ flexGrow: 1, outline: 'none', width: '100%', maxWidth: 1440, mx: 'auto', p: { xs: 2, sm: 3, md: 4 }, pb: isMobile ? 11 : 4 }}
         >
-          <Outlet />
+          <Suspense fallback={<LinearProgress aria-label="Loading the page" />}>
+            <Outlet />
+          </Suspense>
         </Box>
       </Box>
       {isMobile && mobileNav}
