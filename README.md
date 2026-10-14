@@ -24,11 +24,11 @@ The database is serverless and pauses when idle, so the first request after a qu
 | Question from the brief | Where the app answers it |
 |---|---|
 | What is the current status of each active project? | Dashboard portfolio timeline, project cards, and a written status briefing on every project |
-| Which projects are at risk of missing their deadlines? | Health score on every project (on track, at risk, off track) with the reasons spelled out |
+| Which projects are at risk of missing their deadlines? | Health score on every project (on track, at risk, off track) with the reasons spelled out, plus a forecast finish date based on the pace so far |
 | How are resources allocated across projects? | Workload heatmap: hours booked per person per week against a 40-hour week |
 | What are the key deliverables and their completion status? | Milestones tab, My work board, and progress bars that roll up from deliverables |
 | Which team members are over-allocated? | The 8-hour daily limit is enforced when booking, and the heatmap and Action Center flag anyone over it |
-| What is the dependency chain between deliverables? | Gantt timeline with dependency arrows. A milestone can't start until the ones it waits for are done |
+| What is the dependency chain between deliverables? | Gantt timeline with dependency arrows, the critical path highlighted, and how many days each milestone can slip |
 | How much budget has been consumed versus planned? | Budget tab: planned vs spent, burn chart, spending by category, and a forecast at the current pace |
 
 ## Requirements checklist
@@ -111,6 +111,7 @@ flowchart LR
 - **Health score.** A project is off track if it's past its end date, over budget or has an overdue milestone. It's at risk if it's behind schedule (25+ points less progress than time used), spending faster than it's progressing, has a blocked milestone, or ends within a week below 90% done.
 - **Rescheduling.** Moving a milestone pushes later milestones forward just enough to keep their dependencies, keeping each one's length. Completed milestones never move. If that would run past the project's end, the manager can extend the project in the same step, and both changes go into the history with the reason.
 - **8-hour day.** Booking checks the busiest weekday across every overlapping milestone on every active project. The refusal says how many hours are free and what the person is already booked on.
+- **Critical path and delivery forecast.** The Timeline tab finds the chain of milestones with the least slack, using a backward pass over the dependency graph in reverse topological order (Kahn's algorithm). A delay anywhere on that chain moves the project end date, and every other milestone shows how many days it can slip. The forecast projects the finish date from the pace of work so far, as an early warning rather than a promise.
 - **Action Center.** Rules raise items for overdue projects and milestones, budgets over plan, blocked or overdue work, over-allocated people, milestones ready to start or close, and projects ready to complete. Items close themselves once the problem is fixed and reopen if it comes back. Closing anything by hand requires a note, and every resolution is in the audit log.
 
 ## Running it locally
@@ -138,9 +139,9 @@ API_URL=https://<cloudfront-domain>/api .venv/bin/python scripts/seed_demo.py
 
 | Suite | Count | Command |
 |---|---|---|
-| Backend unit tests (validation, auth, router, health score, scheduling, forecast) | part of 200 | `.venv/bin/pytest tests/backend/unit` |
-| Backend integration tests (real API and database, every role and rule) | part of 200 | `.venv/bin/pytest tests/backend/integration` |
-| Frontend tests (API client, login journey, briefing, formatting, forms, components) | 34 | `cd frontend && npm test` |
+| Backend unit tests (validation, auth, router, health score, scheduling, forecast) | part of 216 | `.venv/bin/pytest tests/backend/unit` |
+| Backend integration tests (real API and database, every role and rule) | part of 216 | `.venv/bin/pytest tests/backend/integration` |
+| Frontend tests (API client, login journey, briefing, formatting, forms, components) | 41 | `cd frontend && npm test` |
 | Load test against the live API | see below | `API_URL=... .venv/bin/python scripts/load_test.py` |
 
 Full output and coverage: [backend](docs/test-results-backend.txt), [frontend](docs/test-results-frontend.txt). Integration tests create their own uniquely named users, so they can run any number of times, and modules that book time use their own employee so the 8-hour rule doesn't make results depend on test order.
