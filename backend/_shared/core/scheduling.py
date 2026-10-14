@@ -1,6 +1,7 @@
 """Pure scheduling logic with no database code, shared by services and covered by unit tests."""
+import math
 from collections import defaultdict, deque
-from datetime import timedelta
+from datetime import date, timedelta
 
 WORKDAY_HOURS = 8.0
 
@@ -74,3 +75,65 @@ def weekly_hours(assignments, week_start):
         day = week_start + timedelta(days=offset)
         total += sum(float(a["hours_per_day"]) for a in assignments if a["start_date"] <= day <= a["end_date"])
     return total
+
+
+def critical_path(nodes, edges, project_end):
+    """Critical path analysis for the open milestones of one project.
+
+    slack_days is how many calendar days a milestone can slip before the project end date has to
+    move. It counts any gap before the milestones that wait on it, which is the same rule
+    plan_reschedule uses when it shifts dependents. The critical path is the set of milestones with
+    the least slack: a delay on any of them delays the whole project by the same amount.
+    Completed milestones are fixed history, so they are left out."""
+    open_ids = {nid for nid, node in nodes.items() if node["status"] != "done"}
+    dependents, prereqs = defaultdict(list), defaultdict(list)
+    for milestone, prerequisite in edges:
+        if milestone in open_ids and prerequisite in open_ids:
+            dependents[prerequisite].append(milestone)
+            prereqs[milestone].append(prerequisite)
+
+    # Backward pass in reverse topological order: a milestone is handled once everything that
+    # waits on it has been handled (Kahn's algorithm on the reversed graph).
+    waiting = {nid: len(dependents[nid]) for nid in open_ids}
+    queue = deque(sorted(nid for nid, count in waiting.items() if count == 0))
+    slack = {}
+    while queue:
+        nid = queue.popleft()
+        end = nodes[nid]["end_date"]
+        if dependents[nid]:
+            slack[nid] = min((nodes[d]["start_date"] - end).days + slack[d] for d in dependents[nid])
+        else:
+            slack[nid] = (project_end - end).days
+        for prerequisite in prereqs[nid]:
+            waiting[prerequisite] -= 1
+            if waiting[prerequisite] == 0:
+                queue.append(prerequisite)
+    if len(slack) != len(open_ids):
+        raise ValueError("Dependency cycle detected")
+    if not slack:
+        return {"slack": {}, "critical": [], "buffer_days": None}
+    buffer_days = min(slack.values())
+    critical = sorted((nid for nid, days in slack.items() if days == buffer_days),
+                      key=lambda nid: (nodes[nid]["start_date"], nid))
+    return {"slack": slack, "critical": critical, "buffer_days": buffer_days}
+
+
+def delivery_forecast(progress, start, end, today=None):
+    """Projects the finish date by assuming work keeps getting done at the same pace as so far."""
+    today = today or date.today()
+    progress = float(progress or 0)
+    if progress >= 100:
+        return {"status": "complete", "projected_end": None, "days_late": None}
+    total_days = max((end - start).days + 1, 1)
+    elapsed = (today - start).days + 1
+    if progress <= 0 or elapsed < max(total_days * 0.1, 1):
+        return {"status": "not_enough_data", "projected_end": None, "days_late": None}
+    projected_end = start + timedelta(days=math.ceil(elapsed * 100 / progress) - 1)
+    days_late = (projected_end - end).days
+    if days_late > 3:
+        status = "late"
+    elif days_late < -3:
+        status = "early"
+    else:
+        status = "on_time"
+    return {"status": status, "projected_end": projected_end, "days_late": days_late}

@@ -193,6 +193,32 @@ def list_milestones(req):
         return 200, [_finish(m) for m in cur.fetchall()]
 
 
+@router.route("GET", "/schedule")
+def project_schedule(req):
+    """Critical path, slack per milestone, and a delivery forecast for one project."""
+    project_id = query_int(req.query, "project_id")
+    if not project_id:
+        raise bad_request("Invalid filter.", {"project_id": "Required."})
+    with db.transaction() as cur:
+        project = load_project(cur, req.user, project_id)  # 404 if the caller can't see it
+        nodes, edges = _graph(cur, project_id)
+    analysis = scheduling.critical_path(nodes, edges, project["end_date"])
+    if project["status"] == "completed":
+        forecast = {"status": "complete", "projected_end": None, "days_late": None}
+    elif project["is_archived"]:
+        forecast = {"status": "inactive", "projected_end": None, "days_late": None}
+    else:
+        forecast = scheduling.delivery_forecast(project["progress"], project["start_date"], project["end_date"])
+    return 200, {
+        "project_id": project["id"], "end_date": project["end_date"], "buffer_days": analysis["buffer_days"],
+        "critical_path": [{"id": nid, "name": nodes[nid]["name"], "status": nodes[nid]["status"],
+                           "start_date": nodes[nid]["start_date"], "end_date": nodes[nid]["end_date"]}
+                          for nid in analysis["critical"]],
+        "slack": {str(nid): days for nid, days in analysis["slack"].items()},
+        "forecast": forecast,
+    }
+
+
 @router.route("GET", "/{id}")
 def get_milestone(req):
     with db.transaction() as cur:

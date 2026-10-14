@@ -2,6 +2,7 @@ import { Box, Tooltip, Typography } from '@mui/material';
 import useElementWidth from '../hooks/useElementWidth';
 import { formatDate, parseDate, today as startOfToday } from '../utils/format';
 import { createScale, monthTicks } from '../utils/timeline';
+import { CRITICAL_COLOR } from '../utils/schedule';
 
 /**
  * Milestone timeline (Gantt). Bars run from each milestone's start to its due date and fill with its
@@ -13,6 +14,7 @@ const LABEL = 260;
 const DAY = 86_400_000;
 const AMBER = '#C98A12';
 const RED = '#C2412D';
+const CRITICAL_RING = { boxShadow: `0 0 0 3px ${CRITICAL_COLOR}` };
 const STATUS_TEXT = { done: 'Done', in_progress: 'In progress', blocked: 'Blocked', not_started: 'Not started' };
 
 const ms = (value) => parseDate(value).getTime();
@@ -55,7 +57,7 @@ function BarDetails({ milestone }) {
   );
 }
 
-function Legend() {
+function Legend({ showCritical = false }) {
   const swatch = (sx) => <Box component="span" aria-hidden="true" sx={{ width: 22, height: 12, borderRadius: '4px', boxSizing: 'border-box', display: 'inline-block', ...sx }} />;
   const items = [
     ['Done', swatch({ bgcolor: 'primary.main' })],
@@ -63,16 +65,17 @@ function Legend() {
     ['Not started', swatch({ bgcolor: 'action.hover', border: '2px dashed', borderColor: 'text.disabled' })],
     ['Overdue or blocked', swatch({ bgcolor: `${RED}2E`, border: `2px solid ${RED}` })],
     ['Waits for', <Box key="arrow" component="span" aria-hidden="true" sx={{ width: 22, borderTop: '2px dashed', borderColor: 'text.secondary', display: 'inline-block' }} />],
+    showCritical && ['Critical path', swatch({ border: `3px solid ${CRITICAL_COLOR}` })],
     ['Today', <Box key="today" component="span" aria-hidden="true" sx={{ width: 2, height: 14, bgcolor: AMBER, display: 'inline-block' }} />],
   ];
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', columnGap: 3, rowGap: 1, mt: 2.5, color: 'text.secondary', fontSize: '0.8125rem' }}>
-      {items.map(([label, mark]) => <Box key={label} sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>{mark}{label}</Box>)}
+      {items.filter(Boolean).map(([label, mark]) => <Box key={label} sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>{mark}{label}</Box>)}
     </Box>
   );
 }
 
-export default function GanttChart({ project, milestones }) {
+export default function GanttChart({ project, milestones, critical = null }) {
   const [trackRef, width] = useElementWidth();
   const rows = [...milestones].sort((a, b) => ms(a.start_date) - ms(b.start_date) || a.id - b.id);
   const index = Object.fromEntries(rows.map((m, i) => [m.id, i]));
@@ -134,15 +137,19 @@ export default function GanttChart({ project, milestones }) {
                     <marker id="gantt-arrow-done" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
                       <path d="M0,0 L8,4 L0,8 z" fill="var(--mui-palette-primary-main)" />
                     </marker>
+                    <marker id="gantt-arrow-critical" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M0,0 L8,4 L0,8 z" fill={CRITICAL_COLOR} />
+                    </marker>
                   </defs>
                   {edges.map(({ from, to }) => {
                     const done = from.status === 'done';
+                    const hot = Boolean(critical?.has(from.id) && critical?.has(to.id));
                     return (
-                      <path key={`${from.id}-${to.id}`} fill="none" strokeWidth="1.5"
+                      <path key={`${from.id}-${to.id}`} fill="none" strokeWidth={hot ? 2.5 : 1.5}
                         d={edgePath(right(from), centerY(index[from.id]), left(to), centerY(index[to.id]))}
-                        stroke={done ? 'var(--mui-palette-primary-main)' : 'var(--mui-palette-text-secondary)'}
-                        strokeDasharray={done ? undefined : '4 3'}
-                        markerEnd={`url(#${done ? 'gantt-arrow-done' : 'gantt-arrow'})`} />
+                        stroke={hot ? CRITICAL_COLOR : done ? 'var(--mui-palette-primary-main)' : 'var(--mui-palette-text-secondary)'}
+                        strokeDasharray={done || hot ? undefined : '4 3'}
+                        markerEnd={`url(#${hot ? 'gantt-arrow-critical' : done ? 'gantt-arrow-done' : 'gantt-arrow'})`} />
                     );
                   })}
                 </svg>
@@ -152,12 +159,13 @@ export default function GanttChart({ project, milestones }) {
                   return (
                     <Tooltip key={m.id} arrow title={<BarDetails milestone={m} />}>
                       <Box tabIndex={0} role="img"
-                        aria-label={`${m.name}: ${stateOf(m).toLowerCase()}, ${formatDate(m.start_date)} to ${formatDate(m.end_date)}, ${m.progress}% complete`}
+                        aria-label={`${m.name}: ${stateOf(m).toLowerCase()}, ${formatDate(m.start_date)} to ${formatDate(m.end_date)}, ${m.progress}% complete${critical?.has(m.id) ? ', on the critical path' : ''}`}
                         sx={{
                           position: 'absolute', left: barLeft, width: Math.max(right(m) - barLeft, 8), top: centerY(i) - BAR / 2,
                           height: BAR, borderRadius: '6px', boxSizing: 'border-box', overflow: 'hidden', zIndex: 1,
                           '&:focus-visible': { outline: '2px solid', outlineColor: 'secondary.main', outlineOffset: 2 },
                           ...barSx(m),
+                          ...(critical?.has(m.id) ? CRITICAL_RING : {}),
                         }}>
                         {m.status !== 'done' && m.progress > 0 && (
                           <Box sx={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${m.progress}%`, bgcolor: fillColor(m), opacity: 0.85 }} />
@@ -173,7 +181,7 @@ export default function GanttChart({ project, milestones }) {
           </Box>
         </Box>
       </Box>
-      <Legend />
+      <Legend showCritical={Boolean(critical?.size)} />
     </Box>
   );
 }

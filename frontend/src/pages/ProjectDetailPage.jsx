@@ -11,7 +11,7 @@ import { useAuth } from '../auth/AuthContext';
 import { api } from '../services/api';
 import { useToast } from '../components/Toast';
 import HealthChip, { healthText } from '../components/HealthChip';
-import GanttChart from '../components/GanttChart';
+import ScheduleTimeline, { DeliveryForecast } from '../components/ScheduleTimeline';
 import ProgressCompare from '../components/ProgressCompare';
 import Section from '../components/Section';
 import { EmptyState, ErrorState } from '../components/PageState';
@@ -78,6 +78,7 @@ function Overview({ project, milestones, showBudget }) {
         </Section>
         <Section title="Health" subtitle="Work done compared with time and budget used.">
           <ProgressCompare project={project} showBudget={showBudget} />
+          {!project.is_archived && <DeliveryForecast projectId={project.id} />}
           {!project.is_archived && project.risk_reasons.length > 0 && (
             <Box component="ul" sx={{ mt: 2.5, mb: 0, pl: 2.5 }}>
               {project.risk_reasons.map((reason) => (
@@ -221,7 +222,7 @@ export default function ProjectDetailPage() {
       {tab === 'timeline' && (
         <Section title="Timeline" subtitle="Bars run from each milestone's start to its due date. Arrows show which milestones wait on others. Hover a bar for details.">
           {milestonesQuery.isPending ? <Skeleton variant="rounded" height={240} />
-            : milestones.length ? <GanttChart project={project} milestones={milestones} />
+            : milestones.length ? <ScheduleTimeline project={project} milestones={milestones} />
               : <EmptyState title="No milestones yet" message="Milestones will show up here once they're added." />}
         </Section>
       )}
