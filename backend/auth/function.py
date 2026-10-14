@@ -1,5 +1,6 @@
 """Auth service: login, token refresh, logout, current user, change password."""
 from core import auth as tokens
+from core import security
 from core import db
 from core.errors import bad_request, unauthorized
 from core.http import Router
@@ -17,11 +18,17 @@ def login(req):
     with db.transaction() as cur:
         cur.execute("SELECT * FROM users WHERE LOWER(username) = LOWER(%s)", (data["username"],))
         user = cur.fetchone()
-        if not tokens.verify_password(data["password"], user["password_hash"] if user else None):
-            raise unauthorized("Incorrect username or password.", "INVALID_CREDENTIALS")
-        if not user["is_active"]:
-            raise unauthorized(tokens.REFRESH_ERRORS["ACCOUNT_INACTIVE"], "ACCOUNT_INACTIVE")
-        refresh_token = tokens.issue_refresh_token(cur, user["id"])
+        valid = tokens.verify_password(data["password"], user["password_hash"] if user else None)
+        failure = None if valid and user["is_active"] else ("INVALID_CREDENTIALS" if not valid else "ACCOUNT_INACTIVE")
+        if user:
+            security.record_sign_in(cur, user["id"], failure is None, req.headers)
+        if failure is None:
+            refresh_token = tokens.issue_refresh_token(cur, user["id"])
+    # Raised after the transaction commits, so failed attempts stay in the sign-in history
+    if failure == "INVALID_CREDENTIALS":
+        raise unauthorized("Incorrect username or password.", "INVALID_CREDENTIALS")
+    if failure:
+        raise unauthorized(tokens.REFRESH_ERRORS["ACCOUNT_INACTIVE"], "ACCOUNT_INACTIVE")
     return 200, tokens.token_payload(user, refresh_token)
 
 
@@ -64,6 +71,9 @@ def change_password(req):
         cur.execute("UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = %s AND revoked_at IS NULL",
                     (req.user["id"],))
     return 204, None
+
+
+security.register(router)  # adds GET /auth/sign-ins
 
 
 def handler(event, context=None):

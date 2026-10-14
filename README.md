@@ -141,9 +141,9 @@ API_URL=https://<cloudfront-domain>/api .venv/bin/python scripts/seed_demo.py
 
 | Suite | Count | Command |
 |---|---|---|
-| Backend unit tests (validation, auth, router, health score, scheduling, forecast) | part of 267 | `.venv/bin/pytest tests/backend/unit` |
-| Backend integration tests (real API and database, every role and rule) | part of 267 | `.venv/bin/pytest tests/backend/integration` |
-| Frontend tests (API client, login journey, briefing, formatting, forms, components) | 51 | `cd frontend && npm test` |
+| Backend unit tests (validation, auth, router, health score, scheduling, forecast) | part of 281 | `.venv/bin/pytest tests/backend/unit` |
+| Backend integration tests (real API and database, every role and rule) | part of 281 | `.venv/bin/pytest tests/backend/integration` |
+| Frontend tests (API client, login journey, briefing, formatting, forms, components) | 57 | `cd frontend && npm test` |
 | Load test against the live API | see below | `API_URL=... .venv/bin/python scripts/load_test.py` |
 
 Full output and coverage: [backend](docs/test-results-backend.txt), [frontend](docs/test-results-frontend.txt). Integration tests create their own uniquely named users, so they can run any number of times, and modules that book time use their own employee so the 8-hour rule doesn't make results depend on test order.

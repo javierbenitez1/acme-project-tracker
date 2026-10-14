@@ -1,3 +1,4 @@
+import { ClassificationBanner, SessionGuard } from './SecurityChrome';
 import { Suspense, useState } from 'react';
 import AssistantPanel from './AssistantPanel';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -166,10 +167,12 @@ export default function AppShell() {
           tabIndex={-1}
           sx={{ flexGrow: 1, outline: 'none', width: '100%', maxWidth: 1440, mx: 'auto', p: { xs: 2, sm: 3, md: 4 }, pb: isMobile ? 11 : 4 }}
         >
+          <ClassificationBanner />
           <Suspense fallback={<LinearProgress aria-label="Loading the page" />}>
             <Outlet />
           </Suspense>
           <AssistantPanel />
+          <SessionGuard />
         </Box>
       </Box>
       {isMobile && mobileNav}

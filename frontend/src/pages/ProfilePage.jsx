@@ -1,3 +1,4 @@
+import { RecentSignIns } from '../components/SecurityChrome';
 import { Box, Stack, TextField, Typography } from '@mui/material';
 import { Button, CircularProgress } from '@mui/material';
 import { useAuth } from '../auth/AuthContext';
@@ -79,6 +80,7 @@ export default function ProfilePage() {
           </Stack>
         </Box>
       </Section>
+      <RecentSignIns />
     </Stack>
   );
 }

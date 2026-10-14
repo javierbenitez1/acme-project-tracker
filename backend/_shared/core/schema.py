@@ -232,6 +232,16 @@ CREATE TABLE IF NOT EXISTS risks (
     UNIQUE (project_id, source_key)
 );
 CREATE INDEX IF NOT EXISTS idx_risks_project ON risks(project_id, status);
+
+CREATE TABLE IF NOT EXISTS sign_in_events (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    succeeded BOOLEAN NOT NULL,
+    device VARCHAR(100),
+    ip_masked VARCHAR(64),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_sign_in_events_user ON sign_in_events(user_id, created_at DESC);
 """
 
 _READY = False

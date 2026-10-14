@@ -1,3 +1,4 @@
+import StatusReportButton from '../components/StatusReport';
 import { Fragment } from 'react';
 import { Link as RouterLink, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -195,6 +196,7 @@ export default function ProjectDetailPage() {
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1.5 }}>
           <Typography variant="h1">{project.name}</Typography>
           <HealthChip value={project.health} />
+          {project.can_manage && <Box sx={{ ml: 'auto' }}><StatusReportButton project={project} /></Box>}
         </Box>
         <Typography color="text.secondary" sx={{ mt: 1 }}>
           Managed by {project.manager_name}{project.department ? ` in ${project.department}` : ''},

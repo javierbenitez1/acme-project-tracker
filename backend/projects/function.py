@@ -367,6 +367,10 @@ from core import risks as risk_register  # noqa: E402 (adds the /projects/risks 
 
 risk_register.register(router)
 
+from core import reports  # noqa: E402 (adds GET /projects/{id}/report to this router)
+
+reports.register(router)
+
 
 def handler(event, context=None):
     return router.handle(event, context)
