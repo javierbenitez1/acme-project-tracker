@@ -139,7 +139,7 @@ def _check_capacity(cur, user, milestone, hours):
     if peak + float(hours) > scheduling.WORKDAY_HOURS:
         available = max(scheduling.WORKDAY_HOURS - peak, 0)
         raise conflict(
-            f"{user['name']} only has {available:g} hour(s) a day free on {day} "
+            f"{user['name']} only has {available:g} hour(s) a day free on {day:%b} {day.day} "
             f"({peak:g} of {scheduling.WORKDAY_HOURS:g} already booked).",
             {"available_hours": available, "requested_hours": float(hours), "busiest_day": day,
              "booked_on": [{"milestone": o["name"], "project": o["project_name"],
@@ -159,7 +159,7 @@ def _overload_warnings(cur, milestone_ids):
         peak, day = scheduling.peak_daily_load(others, row["start_date"], row["end_date"])
         total = peak + float(row["hours_per_day"])
         if total > scheduling.WORKDAY_HOURS:
-            warnings.append(f"{row['name']} is now booked {total:g}h on {day} because of {row['milestone_name']}.")
+            warnings.append(f"{row['name']} is now booked {total:g}h on {day:%b} {day.day} because of {row['milestone_name']}.")
     return warnings
 
 

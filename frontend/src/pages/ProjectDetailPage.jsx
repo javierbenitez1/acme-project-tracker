@@ -15,6 +15,9 @@ import GanttChart from '../components/GanttChart';
 import ProgressCompare from '../components/ProgressCompare';
 import Section from '../components/Section';
 import { EmptyState, ErrorState } from '../components/PageState';
+import MilestonesTab from '../components/project/MilestonesTab';
+import TeamTab from '../components/project/TeamTab';
+import BudgetTab from '../components/project/BudgetTab';
 import { projectBriefing } from '../utils/briefing';
 import { formatDate, formatMoney, initials, timeAgo } from '../utils/format';
 
@@ -104,43 +107,6 @@ function Overview({ project, milestones, showBudget }) {
   );
 }
 
-function Team({ project, milestones }) {
-  return (
-    <Section title="Team" subtitle="Everyone on this project and the open milestones they're booked on.">
-      <List disablePadding>
-        {project.members.map((member) => {
-          const bookings = milestones
-            .filter((m) => m.status !== 'done')
-            .flatMap((m) => m.assignees.filter((a) => a.user_id === member.id).map((a) => `${m.name} (${Number(a.hours_per_day)}h/day)`));
-          const detail = [
-            member.job_title,
-            bookings.length ? `Booked on ${bookings.join(', ')}` : !member.is_manager && 'Not booked on any open milestone',
-          ].filter(Boolean).join('. ');
-          return (
-            <ListItem key={member.id} disableGutters divider>
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: member.is_manager ? 'secondary.main' : 'primary.main', color: member.is_manager ? 'secondary.contrastText' : 'primary.contrastText', fontWeight: 700, fontSize: '0.9rem' }}>
-                  {initials(member.name)}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                slotProps={{ primary: { component: 'div' } }}
-                primary={(
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-                    <Typography sx={{ fontWeight: 600 }}>{member.name}</Typography>
-                    {member.is_manager && <Chip size="small" label="Project manager" />}
-                  </Box>
-                )}
-                secondary={detail}
-              />
-            </ListItem>
-          );
-        })}
-      </List>
-    </Section>
-  );
-}
-
 function History({ project, milestones }) {
   const names = Object.fromEntries(milestones.map((m) => [m.id, m.name]));
   const entries = [
@@ -172,14 +138,6 @@ function History({ project, milestones }) {
           ))}
         </Box>
       )}
-    </Section>
-  );
-}
-
-function NextSession({ title }) {
-  return (
-    <Section title={title}>
-      <Typography color="text.secondary">The forms for this tab are coming in the next build step. The API behind them is already live and tested.</Typography>
     </Section>
   );
 }
@@ -267,9 +225,9 @@ export default function ProjectDetailPage() {
               : <EmptyState title="No milestones yet" message="Milestones will show up here once they're added." />}
         </Section>
       )}
-      {tab === 'milestones' && <NextSession title="Milestones" />}
-      {tab === 'team' && <Team project={project} milestones={milestones} />}
-      {tab === 'budget' && <NextSession title="Budget" />}
+      {tab === 'milestones' && <MilestonesTab project={project} milestones={milestones} loading={milestonesQuery.isPending} />}
+      {tab === 'team' && <TeamTab project={project} milestones={milestones} />}
+      {tab === 'budget' && <BudgetTab project={project} />}
       {tab === 'history' && <History project={project} milestones={milestones} />}
     </Stack>
   );
