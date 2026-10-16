@@ -91,7 +91,7 @@ flowchart LR
 
 ### Data model
 
-`users`, `projects`, `project_members`, `milestones`, `milestone_dependencies`, `milestone_assignments` (hours per day), `deliverables`, `budget_entries`, `budget_changes`, `date_changes` (every reschedule, with its reason), `action_items`, `activity_log` (the audit trail with before and after values) and `refresh_tokens`.
+18 tables. The main records: `users`, `projects`, `milestones`, `deliverables`, `budget_entries`, `risks` and `action_items`. Links between them: `project_members`, `milestone_dependencies`, `milestone_assignments` (hours per day), `teams` and `team_members`. History: `activity_log` (the audit trail with before and after values), `budget_changes` and `date_changes` (every reschedule, with its reason). Security and settings: `refresh_tokens`, `sign_in_events` (every sign-in attempt, with a masked network address) and `app_config`.
 
 ### Roles and permissions
 
@@ -114,6 +114,8 @@ flowchart LR
 - **Critical path and delivery forecast.** The Timeline tab finds the chain of milestones with the least slack, using a backward pass over the dependency graph in reverse topological order (Kahn's algorithm). A delay anywhere on that chain moves the project end date, and every other milestone shows how many days it can slip. The forecast projects the finish date from the pace of work so far, as an early warning rather than a promise.
 - **Risk register.** Each project has a Risks tab: risks scored by likelihood and impact (1 to 5 each) on a 5x5 matrix, each with an owner, a mitigation plan, a review date and a status. The app suggests risks from live signals (no buffer on the critical path, a late delivery forecast, spending on pace to overrun), and managers add or dismiss them. Overdue reviews become Action Center items, every change is audited, and employees can read risks but never see budget risks.
 - **Ask Throughline.** A chat assistant on every page (or Ctrl+J) that answers plain-English questions from live data: project status, what's at risk, overdue, blocked or due soon, who's overbooked or free, budgets, and "what should I work on?". It also works as built-in support, explaining how to reschedule, assign people, restore projects and more. It is rule-based on purpose: questions are matched to intents, answers come from the same permission-checked queries as the rest of the app, so it can't invent facts or reveal data. answer() is a single entry point, so an LLM such as Claude on Bedrock could slot in later.
+- - **Weekly status report.** A one-page RAG (red, amber, green) report for steering committees, rating schedule, budget and risks with the reason next to each color. The ratings follow fixed rules on live data, so nobody can mark a struggling project green by hand. It prints to PDF.
+- **Sign-in security.** Five failed attempts lock an account for 15 minutes, even with the right password. People are signed out after 15 minutes idle, with a 2-minute warning. Every sign-in attempt is recorded with the device and a masked network address, and a notice appears if someone failed to sign in while you were away. Every page carries an "Internal use only" banner.
 - **Action Center.** Rules raise items for overdue projects and milestones, budgets over plan, blocked or overdue work, over-allocated people, milestones ready to start or close, and projects ready to complete. Items close themselves once the problem is fixed and reopen if it comes back. Closing anything by hand requires a note, and every resolution is in the audit log.
 
 ## Running it locally
@@ -190,7 +192,7 @@ Found by my own tests:
 
 ## Known gaps and next steps
 
-- **Frontend test coverage is about 16% overall.** The logic everything relies on (API client, briefing, formatting, form state) is at 97 to 100%, but the big pages are tested by hand, not automatically. Next: page tests with a mocked API, and Cypress end-to-end tests for each role's main journey.
+- **Frontend test coverage is focused on the core logic.** The logic everything relies on (API client, briefing, formatting, form state) is at 97 to 100%, but the big pages are tested by hand, not automatically. Next: page tests with a mocked API, and Cypress end-to-end tests for each role's main journey.
 - **No end-to-end browser tests yet.**
 - **Teams (the stretch goal) aren't built.** The table exists in the schema, and cross-team staffing already works through project membership.
 - **The serverless database pauses when idle,** so the first request can be slow. Keeping a minimum capacity or adding RDS Proxy would fix it, at extra cost.
